@@ -1,0 +1,4 @@
+[core]
+    remote = bookdata
+['remote "bookdata"']
+    url = gs://bookclub-bookdata
