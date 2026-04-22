@@ -1,6 +1,14 @@
 # Book Recommender
 Classifies books based on specific dataset features
 
+## Branching Strategy
+
+See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for the branching strategy used in this project.
+
+## Architecture
+
+See [docs/architecture.md](docs/architecture.md) for the planned MLOps system architecture.
+
 ## Relevant Project Sources
 
 - [MLFlow Tracking Quick Start](https://mlflow.org/docs/latest/ml/tracking/quickstart/)

@@ -1,3 +1,6 @@
 # Core DVC with Google Cloud Storage support
 dvc[gs]
 google-cloud-storage
+
+# Testing
+pytest
