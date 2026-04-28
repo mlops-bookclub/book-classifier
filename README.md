@@ -23,24 +23,34 @@ See [docs/architecture.md](docs/architecture.md) for the planned MLOps system ar
 - [GitHub Actions QuickStart](https://docs.github.com/en/actions/get-started/quickstart)
 
 # Repository Structure
+
+```text
 book-recommender/
-├── .dvc/                     # DVC configuration
-├── .github/workflows/        # CI/CD pipelines
-├── docs/                     # Documentation and Reports for Submissions
-├── frontend/                 
-│   ├── src/
-│   └── tests/
-├── backend/                  # API and model serving                   
-│   ├── src/
-│   └── tests/               
-├── ml_pipeline/              # Data preparation, model training, evaluation, ... 
-│   ├── src/
-│   └── tests/
-├── experiments/              # Exploratory Data Analysis and prototyping notebooks
-├── infrastructure/           # Ops (e.g. Terraform for Cloud provisioning)
-├── integration_tests/        # Tests spanning multiple services
-├── models/                   # Tracked via DVC (the physical artifacts)
-└── data/                     # Tracked via DVC (raw and processed)
+├── .dvc/                  # DVC configuration
+├── .github/workflows/     # CI/CD pipelines
+├── docs/                  # Documentation and submission material
+├── frontend/              # Frontend application
+│   ├── src/               # Frontend source code
+│   └── tests/             # Frontend-specific tests
+├── backend/               # API and model serving
+│   ├── src/               # Backend application source code
+│   └── tests/             # Backend-specific tests
+├── ml_pipeline/           # Data prep, training, evaluation, utilities
+│   ├── src/               # Pipeline source code
+│   │   ├── datasets/
+│   │   ├── evaluation/
+│   │   ├── features/
+│   │   ├── models/
+│   │   ├── trainers/
+│   │   ├── transforms/
+│   │   └── utils/
+│   └── tests/             # Pipeline-specific tests
+├── experiments/           # EDA notebooks and prototyping (Note: 'notebooks' is great here!)
+├── infrastructure/        # Infra and deployment config
+├── integration_tests/     # Cross-service and repo structure tests
+├── models/                # DVC-tracked model artifacts
+└── data/                  # DVC-tracked raw/processed data
+```
 
 # Data Setup: Git, DVC, and GCP
 
