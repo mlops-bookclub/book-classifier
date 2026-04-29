@@ -1,4 +1,11 @@
+<p align=right style="margin-bottom: -2rem">
+  <a href="https://github.com/mlops-bookclub/book-recommender/actions/workflows/python-test.yml">
+    <img src="https://github.com/mlops-bookclub/book-recommender/actions/workflows/python-test.yml/badge.svg?branch=main&event=push" alt="Test">
+  </a>
+</p>
+
 # Book Recommender
+
 Classifies books based on specific dataset features
 
 ## Branching Strategy
