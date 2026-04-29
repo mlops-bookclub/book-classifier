@@ -1,0 +1,12 @@
+{
+  "model": "item_based_cf",
+  "ratings_path": "data\\raw\\goodbooks-10k\\ratings.csv",
+  "min_rating": 4,
+  "top_k": 10,
+  "top_neighbors": 50,
+  "train_interactions": 4068705,
+  "test_interactions": 53398,
+  "num_users": 53398,
+  "hit_rate_at_k": 0.043054046968051235,
+  "recall_at_k": 0.043054046968051235
+}

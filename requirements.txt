@@ -12,4 +12,5 @@ nbclient
 nbformat
 numpy
 pandas
+scipy
 seaborn

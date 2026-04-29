@@ -22,75 +22,114 @@ See [docs/architecture.md](docs/architecture.md) for the planned MLOps system ar
 - [Fast API](https://fastapi.tiangolo.com/tutorial/first-steps/)
 - [GitHub Actions QuickStart](https://docs.github.com/en/actions/get-started/quickstart)
 
-# Repository Structure
+## Repository Structure
 
 ```text
 book-recommender/
-├── .dvc/                  # DVC configuration
-├── .github/workflows/     # CI/CD pipelines
-├── docs/                  # Documentation and submission material
-├── frontend/              # Frontend application
-│   ├── src/               # Frontend source code
-│   └── tests/             # Frontend-specific tests
-├── backend/               # API and model serving
-│   ├── src/               # Backend application source code
-│   └── tests/             # Backend-specific tests
-├── ml_pipeline/           # Data prep, training, evaluation, utilities
-│   ├── src/               # Pipeline source code
-│   │   ├── datasets/
-│   │   ├── evaluation/
-│   │   ├── features/
-│   │   ├── models/
-│   │   ├── trainers/
-│   │   ├── transforms/
-│   │   └── utils/
-│   └── tests/             # Pipeline-specific tests
-├── experiments/           # EDA notebooks and prototyping (Note: 'notebooks' is great here!)
-├── infrastructure/        # Infra and deployment config
-├── integration_tests/     # Cross-service and repo structure tests
-├── models/                # DVC-tracked model artifacts
-└── data/                  # DVC-tracked raw/processed data
+|-- .dvc/                  # DVC configuration
+|-- .github/workflows/     # CI/CD pipelines
+|-- docs/                  # Documentation and submission material
+|-- frontend/              # Frontend application
+|   |-- src/               # Frontend source code
+|   `-- tests/             # Frontend-specific tests
+|-- backend/               # API and model serving
+|   |-- src/               # Backend application source code
+|   `-- tests/             # Backend-specific tests
+|-- ml_pipeline/           # Data prep, training, evaluation, utilities
+|   |-- src/               # Pipeline source code
+|   |   |-- datasets/
+|   |   |-- evaluation/
+|   |   |-- features/
+|   |   |-- models/
+|   |   |-- trainers/
+|   |   |-- transforms/
+|   |   `-- utils/
+|   `-- tests/             # Pipeline-specific tests
+|-- experiments/           # EDA notebooks and prototyping
+|-- infrastructure/        # Infra and deployment config
+|-- integration_tests/     # Cross-service and repo structure tests
+|-- models/                # Metrics and DVC-tracked model artifacts
+`-- data/                  # DVC-tracked raw/processed data
 ```
 
-# Data Setup: Git, DVC, and GCP
+## Data Setup: Git, DVC, and GCP
 
 This project uses [Git](https://git-scm.com/) for source code version control and [DVC (Data Version Control)](https://dvc.org/) for managing large datasets and model files. Our DVC remote storage is hosted in a Google Cloud Platform (GCP) bucket.
 
----
-
 ## 1. Prerequisites
 
-Before starting, ensure you have Python and Git installed on your machine.
-We use a `requirements.txt` file to manage DVC and its Google Cloud Storage dependencies. It is highly recommended to use a virtual environment (like `venv` or `conda`). 
+Before starting, ensure you have Python and Git installed on your machine. We use `requirements.txt` to manage DVC and analysis dependencies. It is recommended to use a virtual environment such as `venv` or `conda`.
 
 Once your virtual environment is active, install the dependencies by running:
+
 ```bash
 pip install -r requirements.txt
 ```
+
 ## 2. Setting Up GCP Authentication
 
-Instead of managing shared keys, we use Application Default Credentials (ADC). This allows DVC to automatically securely use your personal Google account to access the cloud storage.
+Instead of managing shared keys, the project uses Application Default Credentials (ADC). This allows DVC to securely use your Google account to access the cloud storage.
+
 ### Step 1: Ensure you have bucket access
 
-Ensure that the project administrator has granted your Google account the necessary IAM permissions (e.g., Storage Object Admin or Storage Object Viewer) for the project's GCP bucket.
+Ensure that the project administrator has granted your Google account the necessary IAM permissions for the GCP bucket.
+
 ### Step 2: Authenticate via the gcloud CLI
 
-Open your terminal and run the following command to log in:
+Open your terminal and run:
+
 ```bash
 gcloud auth application-default login
 ```
-This command will open a browser window. Log in using the Google account associated with your GCP permissions. Once completed, gcloud will save your credentials locally, and DVC will automatically detect and use them.
+
+This opens a browser window. Log in using the Google account associated with your GCP permissions. Once completed, `gcloud` saves your credentials locally, and DVC can detect and use them automatically.
 
 ## 3. Pulling the Data
-Once your credentials are set up and dependencies are installed, getting the data is as simple as running standard Git and DVC commands.
 
-1. First, make sure your Git repository is up to date:
+Once your credentials are set up and dependencies are installed, update the repository and then download the matching data files:
+
 ```bash
-    git pull
+git pull
+dvc pull
 ```
 
-2. Then, download the corresponding data files from the GCP bucket:
-```bash
-    dvc pull
+## First Recommendation Baseline
+
+The current baseline is an item-item collaborative filtering recommender built from `data/raw/goodbooks-10k/ratings.csv`.
+- [Baseline Recommender](docs/baseline_recommender.md)
+
+- Treat ratings of `4` or `5` as positive user-book interactions.
+- Use a leave-one-out split per user and hold out each user's last positive interaction for testing.
+- Build book-book similarity from shared readers only.
+- Keep the top `50` most similar books per book.
+- Score unseen candidate books by summing similarity contributions from the books in each user's training history.
+- Recommend the top `10` unseen books.
+
+Book-book similarity uses cosine similarity over binary user interaction vectors:
+
+```text
+sim(i, j) = co_likes(i, j) / sqrt(likes(i) * likes(j))
 ```
-If authentication is successful, DVC will connect to GCP and download the data into your workspace.
+
+Where:
+
+- `co_likes(i, j)` is the number of users who positively rated both books.
+- `likes(i)` is the number of users who positively rated book `i`.
+- `likes(j)` is the number of users who positively rated book `j`.
+
+The implementation uses `scipy.sparse` to compute the item-item neighborhood graph efficiently.
+
+Run it from the repository root with:
+
+```bash
+python -m ml_pipeline.src.trainers.run_baseline
+```
+
+The metrics artifact is written to `models/metrics/item_based_cf_baseline.json` by default.
+
+Current full-run baseline result:
+
+- `top_neighbors = 50`
+- `HitRate@10 = 0.0431`
+- `Recall@10 = 0.0431`
+- `53,398` users evaluated
