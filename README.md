@@ -52,6 +52,11 @@ book-recommender/
 `-- data/                  # DVC-tracked raw/processed data
 ```
 
+## Weights and Biases Setup
+
+Create a Weights & Biases Api Token and save it in the .env file in the root directory of the project as: 
+WANDB_API_KEY=....
+
 ## Data Setup: Git, DVC, and GCP
 
 This project uses [Git](https://git-scm.com/) for source code version control and [DVC (Data Version Control)](https://dvc.org/) for managing large datasets and model files. Our DVC remote storage is hosted in a Google Cloud Platform (GCP) bucket.

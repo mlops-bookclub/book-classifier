@@ -5,6 +5,9 @@ google-cloud-storage
 # Testing
 pytest
 
+#experiment tracking
+wandb
+
 # Exploratory data analysis
 ipykernel
 matplotlib

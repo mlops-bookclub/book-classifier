@@ -6,7 +6,7 @@ from pathlib import Path
 import pandas as pd
 
 
-DEFAULT_RATINGS_PATH = Path("data/raw/goodbooks-10k/ratings.csv")
+DEFAULT_RATINGS_PATH = Path("../../../data/raw/goodbooks-10k/ratings.csv")
 
 
 @dataclass(frozen=True)
@@ -16,8 +16,8 @@ class LeaveOneOutSplit:
 
 
 def load_positive_ratings(
-    ratings_path: str | Path = DEFAULT_RATINGS_PATH,
-    min_rating: int = 4,
+        ratings_path: str | Path = DEFAULT_RATINGS_PATH,
+        min_rating: int = 4,
 ) -> pd.DataFrame:
     ratings = pd.read_csv(ratings_path, usecols=["user_id", "book_id", "rating"])
     ratings = ratings[ratings["rating"] >= min_rating].copy()

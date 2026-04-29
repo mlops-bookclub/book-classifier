@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import wandb
+from dotenv import load_dotenv
 from dataclasses import asdict
 from pathlib import Path
 
@@ -12,7 +15,6 @@ from ml_pipeline.src.datasets.goodbooks import (
 )
 from ml_pipeline.src.evaluation.ranking_metrics import evaluate_leave_one_out
 from ml_pipeline.src.models.item_based_cf import ItemBasedCFRecommender
-
 
 DEFAULT_OUTPUT_PATH = Path("models/metrics/item_based_cf_baseline.json")
 
@@ -61,13 +63,33 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main() -> None:
+    load_dotenv()
+
     args = build_parser().parse_args()
+
+    wandb.init(
+        project="mlops-bookclub",
+        name="item-based-cf-baseline",
+        config={
+            "model": "item_based_cf",
+            "ratings_path": str(args.ratings_path),
+            "min_rating": args.min_rating,
+            "top_k": args.top_k,
+            "top_neighbors": args.top_neighbors,
+            "max_users": args.max_users
+        }
+    )
 
     ratings = load_positive_ratings(
         ratings_path=args.ratings_path,
         min_rating=args.min_rating,
     )
     split = make_leave_one_out_split(ratings)
+
+    wandb.config.update({
+        "train_interactions": int(len(split.train)),
+        "test_interactions": int(len(split.test)),
+    })
 
     recommender = ItemBasedCFRecommender(top_neighbors=args.top_neighbors).fit(split.train)
     metrics = evaluate_leave_one_out(
@@ -77,14 +99,10 @@ def main() -> None:
         max_users=args.max_users,
     )
 
+    wandb.log(asdict(metrics))
+
     payload = {
-        "model": "item_based_cf",
-        "ratings_path": str(args.ratings_path),
-        "min_rating": args.min_rating,
-        "top_k": args.top_k,
-        "top_neighbors": args.top_neighbors,
-        "train_interactions": int(len(split.train)),
-        "test_interactions": int(len(split.test)),
+        **wandb.config.as_dict(),
         **asdict(metrics),
     }
 
@@ -93,7 +111,7 @@ def main() -> None:
 
     print(json.dumps(payload, indent=2))
 
+    wandb.finish()
 
 if __name__ == "__main__":
     main()
-
