@@ -1,0 +1,32 @@
+schema: '2.0'
+stages:
+  train_baseline:
+    cmd: python -m ml_pipeline.src.trainers.run_baseline --ratings-path 
+      data/raw/goodbooks-10k/ratings.csv
+    deps:
+    - path: data/raw
+      hash: md5
+      md5: 919aa8206b49cfc19f6e843f433afbd0.dir
+      size: 158152338
+      nfiles: 20
+    - path: ml_pipeline/src/datasets/goodbooks.py
+      hash: md5
+      md5: 0207af4dc48556ee2bf2711f341eb207
+      size: 1188
+    - path: ml_pipeline/src/evaluation/ranking_metrics.py
+      hash: md5
+      md5: 12e7223de632b24b9b71e0049d624bed
+      size: 916
+    - path: ml_pipeline/src/models/item_based_cf.py
+      hash: md5
+      md5: 861564a49c63b12d248b18025a4fb49e
+      size: 4262
+    - path: ml_pipeline/src/trainers/run_baseline.py
+      hash: md5
+      md5: f8b22bd2cee3e863f723bfbbdb051e6b
+      size: 3046
+    outs:
+    - path: models/metrics/item_based_cf_baseline.json
+      hash: md5
+      md5: 96651e081c8a4f2bb8ede7c7521ec607
+      size: 329
