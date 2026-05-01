@@ -9,6 +9,10 @@ See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for the branching strategy used
 
 See [docs/architecture.md](docs/architecture.md) for the planned MLOps system architecture.
 
+## Training
+
+See [docs/training_vm.md](docs/training_vm.md) for instructions on running training on a remote VM, including DVC pipeline execution, Weights & Biases tracking, and pushing artifacts to GCS.
+
 ## Relevant Project Sources
 
 - [MLFlow Tracking Quick Start](https://mlflow.org/docs/latest/ml/tracking/quickstart/)
@@ -73,21 +77,33 @@ pip install -r requirements.txt
 
 ## 2. Setting Up GCP Authentication
 
-Instead of managing shared keys, the project uses Application Default Credentials (ADC). This allows DVC to securely use your Google account to access the cloud storage.
+The DVC remote is hosted on GCP (`gs://bookclub-bookdata`). Two authentication methods are supported:
 
-### Step 1: Ensure you have bucket access
+### Option A: Application Default Credentials (local machine with browser)
 
-Ensure that the project administrator has granted your Google account the necessary IAM permissions for the GCP bucket.
-
-### Step 2: Authenticate via the gcloud CLI
-
-Open your terminal and run:
+Ensure the project administrator has granted your Google account IAM permissions for the bucket, then run:
 
 ```bash
 gcloud auth application-default login
 ```
 
-This opens a browser window. Log in using the Google account associated with your GCP permissions. Once completed, `gcloud` saves your credentials locally, and DVC can detect and use them automatically.
+This opens a browser window. Once completed, DVC will detect and use your credentials automatically.
+
+### Option B: Service Account JSON (headless / VM environments)
+
+For remote VMs or CI environments without a browser, use a service account key:
+
+1. Obtain the service account JSON from the project administrator.
+2. Place it at a safe path (e.g. `~/.config/gcp/service-account.json`) with `chmod 600`.
+3. Add the following to your `.env` file:
+
+```bash
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
+```
+
+DVC will pick up the credential automatically via the environment variable.
+
+> See [docs/training_vm.md](docs/training_vm.md) for the complete VM setup walkthrough.
 
 ## 3. Pulling the Data
 
@@ -117,11 +133,17 @@ Where:
 
 The implementation uses `scipy.sparse` to compute the item-item neighborhood graph efficiently.
 
-Run it from the repository root with:
+The training pipeline is declared in `dvc.yaml` and run via `train.sh`. To reproduce the last committed run:
 
 ```bash
-python -m ml_pipeline.src.trainers.run_baseline
+dvc repro train_baseline
 ```
 
-The metrics artifact is written to `models/metrics/item_based_cf_baseline.json` by default.
+Or to run it directly:
+
+```bash
+python -m ml_pipeline.src.trainers.run_baseline --ratings-path data/raw/goodbooks-10k/ratings.csv
+```
+
+The metrics artifact is written to `models/metrics/item_based_cf_baseline.json`, tracked by DVC, and pushed to `gs://bookclub-bookdata` after each training run. Experiment metrics are logged to [Weights & Biases](https://wandb.ai/mlops-bookclub/mlops-bookclub).
 

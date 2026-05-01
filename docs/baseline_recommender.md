@@ -165,7 +165,7 @@ Ranked recommendations:
 
 ## What Is Saved Currently
 
-Currently, the pipeline saves metrics only, for example:
+The pipeline saves a metrics JSON file tracked by DVC and pushed to the GCS remote after each training run:
 
 - `models/metrics/item_based_cf_baseline.json`
 
@@ -182,6 +182,8 @@ Saved fields include:
 - `hit_rate_at_k`
 - `recall_at_k`
 
+The artifact is registered in `dvc.lock` (committed to Git) so any team member can reproduce or retrieve the exact output with `dvc pull`.
+
 ## What Is Not Saved Currently
 
 - No serialized recommender object
@@ -191,9 +193,11 @@ Saved fields include:
 
 ## Output Locations
 
-- Metrics folder:
-  - [models/metrics](C:/Users/sv3nl/Documents/HSLU/MLOps/book-recommender/models/metrics)
-- Baseline metrics file:
-  - [item_based_cf_baseline.json](C:/Users/sv3nl/Documents/HSLU/MLOps/book-recommender/models/metrics/item_based_cf_baseline.json)
-- Additional run output currently present:
-  - [item_based_cf_baseline_top100.json](C:/Users/sv3nl/Documents/HSLU/MLOps/book-recommender/models/metrics/item_based_cf_baseline_top100.json)
+- Metrics folder: `models/metrics/`
+- Baseline metrics file: `models/metrics/item_based_cf_baseline.json`
+- DVC remote: `gs://bookclub-bookdata` (GCP bucket)
+- Experiment runs: [Weights & Biases — mlops-bookclub project](https://wandb.ai/mlops-bookclub/mlops-bookclub)
+
+## Training Workflow
+
+Training is run on a dedicated VM. See [docs/training_vm.md](training_vm.md) for setup and execution instructions.
