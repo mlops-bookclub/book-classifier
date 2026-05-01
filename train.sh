@@ -12,7 +12,7 @@ set +a
 source .venv/bin/activate
 
 echo "[1/4] Running DVC pipeline (train)..."
-dvc repro train_baseline
+dvc repro --force train_baseline
 
 echo "[2/4] Pushing model artifact to DVC remote (GCS)..."
 dvc push
