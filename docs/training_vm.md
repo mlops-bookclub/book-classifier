@@ -83,11 +83,23 @@ bash train.sh
 
 | Step | Action |
 |------|--------|
-| 1 | Loads `.env` (W&B key, GCP credentials) |
-| 2 | Activates the virtual environment |
-| 3 | Runs `dvc repro --force train_baseline` (trains the model, logs to W&B) |
-| 4 | Runs `dvc push` (uploads the metrics artifact to GCS) |
-| 5 | Commits updated `dvc.lock` to Git and pushes to GitHub |
+| 1 | Resolves the repo root dynamically (works from any working directory) |
+| 2 | Loads `.env` (W&B key, GCP credentials) |
+| 3 | Activates the virtual environment |
+| 4 | Runs `dvc repro --force train_baseline` (trains the model, logs to W&B) |
+| 5 | Runs `dvc push` (uploads the metrics artifact to GCS) |
+| 6 | Commits updated `dvc.lock` to Git |
+| 7 | Pushes the commit to GitHub — **only if `GIT_PUSH_AFTER_TRAIN=1` is set** and the current branch is not `main` |
+
+### Controlling the git push
+
+By default the script commits `dvc.lock` locally but does **not** push to GitHub. To enable pushing:
+
+```bash
+GIT_PUSH_AFTER_TRAIN=1 bash train.sh
+```
+
+Pushing is blocked on `main` to prevent accidental direct pushes to protected branches. Always run training from a feature branch.
 
 ### Running in the background (survives SSH disconnect)
 
